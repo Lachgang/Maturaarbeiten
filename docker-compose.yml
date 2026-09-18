@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  maturaarbeiten_wyss_damian_i3b:
+    image: ${DOCKER_REGISTRY-}maturaarbeitenwyssdamiani3b
+    build:
+      context: .
+      dockerfile: Maturaarbeiten_Wyss_Damian_I3B/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MaturaarbeitenDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Passwort123!
+    ports:
+      - "1433:1433"

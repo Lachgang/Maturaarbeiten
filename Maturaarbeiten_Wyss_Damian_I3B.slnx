@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="Maturaarbeiten_Wyss_Damian_I3B/Maturaarbeiten_Wyss_Damian_I3B.csproj" />
+</Solution>
