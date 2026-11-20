@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   maturaarbeiten_wyss_damian_i3b:
     image: ${DOCKER_REGISTRY-}maturaarbeitenwyssdamiani3b
@@ -11,7 +9,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MaturaarbeitenDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MaturaarbeitenDb;User Id=sa;Password=Passwort123!;TrustServerCertificate=True;
     depends_on:
       - sqlserver
 
@@ -23,3 +22,8 @@ services:
       - MSSQL_SA_PASSWORD=Passwort123!
     ports:
       - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+volumes:
+  mssql_data:

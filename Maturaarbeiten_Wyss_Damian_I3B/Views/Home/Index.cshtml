@@ -1,8 +1,695 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Maturaarbeiten";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<div id="wf-alert-area" class="mb-3"></div>
+
+<!-- LOGIN -->
+<section id="view-login" class="row justify-content-center">
+    <div class="col-12 col-md-6 col-lg-5">
+        <div class="wf-box p-4">
+            <h1 class="h5 fw-bold mb-3">Anmelden</h1>
+            <form id="login-form" novalidate>
+                <div class="mb-3">
+                    <label for="login-email" class="form-label small fw-bold">E-Mail</label>
+                    <input type="email" class="form-control wf-input" id="login-email" required />
+                </div>
+                <div class="mb-3">
+                    <label for="login-password" class="form-label small fw-bold">Passwort</label>
+                    <input type="password" class="form-control wf-input" id="login-password" required />
+                </div>
+                <button type="submit" class="btn wf-btn wf-btn-dark w-100 py-2">Anmelden</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- KATALOG -->
+<section id="view-katalog" class="d-none">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h4 fw-bold mb-0">Präsentationen</h1>
+        <button type="button" class="btn btn-sm wf-btn" id="btn-refresh-katalog">Aktualisieren</button>
+    </div>
+
+    <div id="katalog-status-banner" class="wf-box-dashed p-3 mb-4 small"></div>
+    <div id="katalog-grid" class="row g-3"></div>
+</section>
+
+<!-- MEINE BUCHUNGEN -->
+<section id="view-meine-buchungen" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 fw-bold mb-0">Meine Buchungen</h1>
+        <button type="button" class="btn btn-sm wf-btn" id="btn-refresh-buchungen">Aktualisieren</button>
+    </div>
+
+    <div class="wf-box p-3">
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr>
+                        <th>Thema</th>
+                        <th>Datum &amp; Zeit</th>
+                        <th>Raum</th>
+                        <th>Gebucht am</th>
+                        <th style="width: 130px;">Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="meine-buchungen-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ADMIN: DASHBOARD -->
+<section id="view-admin-dashboard" class="d-none">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h4 fw-bold mb-0">Dashboard</h1>
+        <button type="button" class="btn btn-sm wf-btn" id="btn-refresh-admin-dashboard">Aktualisieren</button>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="wf-box p-3">
+                <div class="text-muted small">Präsentationen</div>
+                <div class="h3 fw-bold mb-0" id="kpi-praesentationen">0</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="wf-box p-3">
+                <div class="text-muted small">Belegte Plätze</div>
+                <div class="h3 fw-bold mb-0" id="kpi-belegt">0</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="wf-box p-3">
+                <div class="text-muted small">Auslastung</div>
+                <div class="h3 fw-bold mb-0" id="kpi-auslastung">0 %</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="wf-box p-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 class="h6 fw-bold mb-0">Übersicht</h2>
+            <input type="search" class="form-control form-control-sm wf-input" style="max-width: 280px;"
+                   id="admin-filter-input" placeholder="Filter..." />
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Thema</th>
+                        <th>Datum &amp; Zeit</th>
+                        <th>Raum</th>
+                        <th>Belegung</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-praesentationen-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ADMIN: CSV-IMPORT -->
+<section id="view-admin-csv" class="d-none">
+    <h1 class="h4 fw-bold mb-3">CSV-Import</h1>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-6">
+            <div class="wf-box p-4 h-100">
+                <h2 class="h6 fw-bold">G3-Lernende</h2>
+                <p class="text-muted small">Vorname;Nachname;Email[;Passwort]</p>
+
+                <form id="form-csv-g3">
+                    <div class="mb-3">
+                        <label for="csv-g3-password" class="form-label small fw-bold">Standardpasswort</label>
+                        <input type="text" class="form-control wf-input" id="csv-g3-password" value="ChangeMe2026!" />
+                    </div>
+                    <div class="wf-box-dashed p-3 mb-3">
+                        <input type="file" class="form-control wf-input" id="csv-g3-file" accept=".csv,text/csv" required />
+                    </div>
+                    <button type="submit" class="btn wf-btn wf-btn-dark">Importieren</button>
+                </form>
+                <div id="csv-g3-result" class="mt-3 small"></div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="wf-box p-4 h-100">
+                <h2 class="h6 fw-bold">Präsentationen</h2>
+                <p class="text-muted small">Thema;Datum;StartZeit;EndZeit;RaumId</p>
+
+                <form id="form-csv-pr">
+                    <div class="wf-box-dashed p-3 mb-3">
+                        <input type="file" class="form-control wf-input" id="csv-pr-file" accept=".csv,text/csv" required />
+                    </div>
+                    <button type="submit" class="btn wf-btn wf-btn-dark">Importieren</button>
+                </form>
+                <div id="csv-pr-result" class="mt-3 small"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ADMIN: BERICHTE -->
+<section id="view-admin-berichte" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 fw-bold mb-0">Raum-Auslastung</h1>
+        <button type="button" class="btn btn-sm wf-btn" id="btn-refresh-berichte">Aktualisieren</button>
+    </div>
+    <div id="berichte-grid" class="row g-3"></div>
+</section>
+
+<!-- ADMIN: SYSTEM-RESET -->
+<section id="view-admin-reset" class="d-none">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-7 col-lg-6">
+            <div class="wf-box p-4">
+                <h1 class="h5 fw-bold mb-2">System-Reset</h1>
+                <p class="text-muted small">Löscht Buchungen, Präsentationen und G3-Lernende.</p>
+
+                <form id="form-system-reset">
+                    <label for="reset-confirm-input" class="form-label small fw-bold">
+                        Bestätigung: <code>RESET</code>
+                    </label>
+                    <input type="text" class="form-control wf-input mb-3" id="reset-confirm-input"
+                           placeholder="RESET" autocomplete="off" />
+
+                    <button type="submit" id="btn-execute-reset" class="btn wf-btn wf-btn-dark w-100 py-2" disabled>
+                        Zurücksetzen
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const state = {
+                token: sessionStorage.getItem("wf_jwt") || "",
+                user: JSON.parse(sessionStorage.getItem("wf_user") || "null"),
+                katalog: [],
+                meineBuchungen: [],
+                berichte: []
+            };
+
+            const allSections = [
+                "view-login",
+                "view-katalog",
+                "view-meine-buchungen",
+                "view-admin-dashboard",
+                "view-admin-csv",
+                "view-admin-berichte",
+                "view-admin-reset"
+            ];
+
+            function showAlert(message, type = "info") {
+                const area = document.getElementById("wf-alert-area");
+                const borderClass = type === "error" ? "border-danger text-danger" : "border-dark text-dark";
+                area.innerHTML = `
+                    <div class="wf-box p-3 ${borderClass} d-flex justify-content-between align-items-start gap-2 small">
+                        <div>${escapeHtml(message)}</div>
+                        <button type="button" class="btn-close" aria-label="Schliessen" onclick="this.parentElement.remove()"></button>
+                    </div>`;
+            }
+
+            function escapeHtml(str) {
+                return String(str ?? "")
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll('"', "&quot;");
+            }
+
+            function updateHeaderAndNav() {
+                const sessionInfo = document.getElementById("wf-session-info");
+                const navStudent = document.getElementById("wf-nav-student");
+                const navAdmin = document.getElementById("wf-nav-admin");
+
+                navStudent.classList.add("d-none");
+                navAdmin.classList.add("d-none");
+
+                if (!state.token || !state.user) {
+                    sessionInfo.textContent = "Nicht angemeldet";
+                    return;
+                }
+
+                const roleLabel = state.user.istAdmin ? "Admin" : "G3";
+                sessionInfo.textContent = `${state.user.vorname} ${state.user.nachname} (${roleLabel})`;
+
+                if (state.user.istAdmin) {
+                    navAdmin.classList.remove("d-none");
+                } else {
+                    navStudent.classList.remove("d-none");
+                    document.getElementById("wf-booking-count").textContent = `${state.meineBuchungen.length}/2`;
+                }
+            }
+
+            function navigateTo(viewName) {
+                allSections.forEach(id => document.getElementById(id)?.classList.add("d-none"));
+                document.getElementById(`view-${viewName}`)?.classList.remove("d-none");
+
+                document.querySelectorAll(".wf-nav-link").forEach(btn => {
+                    btn.classList.toggle("active", btn.dataset.view === viewName);
+                });
+            }
+
+            async function apiFetch(url, options = {}) {
+                const headers = new Headers(options.headers || {});
+                if (state.token) {
+                    headers.set("Authorization", `Bearer ${state.token}`);
+                }
+                if (!(options.body instanceof FormData) && !headers.has("Content-Type") && options.body) {
+                    headers.set("Content-Type", "application/json");
+                }
+
+                const res = await fetch(url, { ...options, headers });
+                const contentType = res.headers.get("content-type") || "";
+                const payload = contentType.includes("application/json")
+                    ? await res.json().catch(() => null)
+                    : await res.text().catch(() => "");
+
+                if (!res.ok) {
+                    const errMsg = (payload && payload.message) || (typeof payload === "string" && payload) || `HTTP ${res.status}`;
+                    throw new Error(errMsg);
+                }
+                return payload;
+            }
+
+            function hasTimeConflict(pr) {
+                return state.meineBuchungen.some(b =>
+                    b.praesentationId !== pr.id &&
+                    b.datum === pr.datum &&
+                    pr.startZeit < b.endZeit &&
+                    pr.endZeit > b.startZeit
+                );
+            }
+
+            function renderKatalog() {
+                const grid = document.getElementById("katalog-grid");
+                const banner = document.getElementById("katalog-status-banner");
+                const count = state.meineBuchungen.length;
+                const bookedIds = new Set(state.meineBuchungen.map(b => b.praesentationId));
+
+                banner.textContent = `Buchungen: ${count} / 2`;
+
+                if (!state.katalog.length) {
+                    grid.innerHTML = `<div class="col-12"><div class="wf-box p-4 text-center text-muted small">Keine Einträge.</div></div>`;
+                    return;
+                }
+
+                grid.innerHTML = state.katalog.map(pr => {
+                    const isBooked = bookedIds.has(pr.id);
+                    const isFull = pr.istAusgebucht || pr.belegtePlaetze >= pr.maxPlaetze;
+                    const conflict = !isBooked && hasTimeConflict(pr);
+                    const maxReached = !isBooked && count >= 2;
+                    const pct = Math.min(100, Math.round((pr.belegtePlaetze / Math.max(1, pr.maxPlaetze)) * 100));
+
+                    let statusText = "Frei";
+                    let btnText = "Buchen";
+                    let disabled = false;
+
+                    if (isBooked) {
+                        statusText = "Gebucht";
+                        btnText = "Gebucht";
+                        disabled = true;
+                    } else if (isFull) {
+                        statusText = "Ausgebucht";
+                        btnText = "Ausgebucht";
+                        disabled = true;
+                    } else if (conflict) {
+                        statusText = "Zeitkonflikt";
+                        btnText = "Zeitkonflikt";
+                        disabled = true;
+                    } else if (maxReached) {
+                        statusText = "Limit";
+                        btnText = "Max. 2 Buchungen";
+                        disabled = true;
+                    }
+
+                    return `
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="wf-box p-3 h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="wf-badge">#${pr.id}</span>
+                                        <span class="badge text-bg-light border border-dark">${escapeHtml(statusText)}</span>
+                                    </div>
+                                    <h2 class="h6 fw-bold mb-2">${escapeHtml(pr.thema)}</h2>
+                                    <div class="small text-muted mb-1">${escapeHtml(pr.datum)} · ${escapeHtml(pr.startZeit)}–${escapeHtml(pr.endZeit)}</div>
+                                    <div class="small text-muted mb-3">Raum ${escapeHtml(pr.raumId)} (${escapeHtml(pr.raumBezeichnung)})</div>
+                                </div>
+
+                                <div>
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span>Plätze</span>
+                                        <span>${pr.belegtePlaetze} / ${pr.maxPlaetze}</span>
+                                    </div>
+                                    <div class="wf-progress mb-3">
+                                        <div class="wf-progress-bar" style="width: ${pct}%;"></div>
+                                    </div>
+                                    <button type="button"
+                                            class="btn wf-btn ${disabled ? "" : "wf-btn-dark"} w-100"
+                                            ${disabled ? "disabled" : ""}
+                                            data-book-id="${pr.id}">
+                                        ${escapeHtml(btnText)}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join("");
+
+                grid.querySelectorAll("[data-book-id]").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+                        const prId = Number(btn.dataset.bookId);
+                        try {
+                            await apiFetch("/api/buchungen", {
+                                method: "POST",
+                                body: JSON.stringify({ praesentationId: prId })
+                            });
+                            showAlert("Buchung gespeichert.", "info");
+                            await loadStudentData();
+                            renderKatalog();
+                            renderMeineBuchungen();
+                        } catch (err) {
+                            showAlert(err.message, "error");
+                        }
+                    });
+                });
+            }
+
+            function renderMeineBuchungen() {
+                const tbody = document.getElementById("meine-buchungen-tbody");
+                if (!state.meineBuchungen.length) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Keine Buchungen.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = state.meineBuchungen.map(b => `
+                    <tr>
+                        <td class="fw-bold">${escapeHtml(b.thema)}</td>
+                        <td>${escapeHtml(b.datum)} · ${escapeHtml(b.startZeit)}–${escapeHtml(b.endZeit)}</td>
+                        <td>${escapeHtml(b.raumId)} (${escapeHtml(b.raumBezeichnung)})</td>
+                        <td>${escapeHtml(new Date(b.gebuchtAm).toLocaleString("de-CH"))}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm wf-btn w-100" data-cancel-id="${b.id}">
+                                Stornieren
+                            </button>
+                        </td>
+                    </tr>`).join("");
+
+                tbody.querySelectorAll("[data-cancel-id]").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+                        const buchungId = Number(btn.dataset.cancelId);
+                        try {
+                            await apiFetch(`/api/buchungen/${buchungId}`, { method: "DELETE" });
+                            showAlert("Buchung storniert.", "info");
+                            await loadStudentData();
+                            renderMeineBuchungen();
+                            renderKatalog();
+                        } catch (err) {
+                            showAlert(err.message, "error");
+                        }
+                    });
+                });
+            }
+
+            function renderAdminDashboard() {
+                const filterText = (document.getElementById("admin-filter-input").value || "").trim().toLowerCase();
+                const filtered = state.katalog.filter(p =>
+                    !filterText ||
+                    p.thema.toLowerCase().includes(filterText) ||
+                    p.raumId.toLowerCase().includes(filterText) ||
+                    p.raumBezeichnung.toLowerCase().includes(filterText)
+                );
+
+                const totalBelegt = state.katalog.reduce((sum, p) => sum + p.belegtePlaetze, 0);
+                const totalKap = state.katalog.length * 6;
+                const avgPct = totalKap === 0 ? 0 : Math.round((totalBelegt / totalKap) * 100);
+
+                document.getElementById("kpi-praesentationen").textContent = String(state.katalog.length);
+                document.getElementById("kpi-belegt").textContent = String(totalBelegt);
+                document.getElementById("kpi-auslastung").textContent = `${avgPct} %`;
+
+                const tbody = document.getElementById("admin-praesentationen-tbody");
+                if (!filtered.length) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Keine Einträge.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = filtered.map(p => {
+                    const status = p.belegtePlaetze >= p.maxPlaetze ? "Ausgebucht" : "Frei";
+                    return `
+                        <tr>
+                            <td>#${p.id}</td>
+                            <td class="fw-bold">${escapeHtml(p.thema)}</td>
+                            <td>${escapeHtml(p.datum)} · ${escapeHtml(p.startZeit)}–${escapeHtml(p.endZeit)}</td>
+                            <td>${escapeHtml(p.raumId)}</td>
+                            <td>${p.belegtePlaetze} / ${p.maxPlaetze}</td>
+                            <td><span class="badge text-bg-light border border-dark">${escapeHtml(status)}</span></td>
+                        </tr>`;
+                }).join("");
+            }
+
+            function renderBerichte() {
+                const grid = document.getElementById("berichte-grid");
+                if (!state.berichte.length) {
+                    grid.innerHTML = `<div class="col-12"><div class="wf-box p-4 text-center text-muted small">Keine Daten.</div></div>`;
+                    return;
+                }
+
+                grid.innerHTML = state.berichte.map(r => `
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="wf-box p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h2 class="h6 fw-bold mb-0">Raum ${escapeHtml(r.raumId)}</h2>
+                                <span class="fw-bold">${r.auslastungProzent} %</span>
+                            </div>
+                            <div class="text-muted small mb-2">${escapeHtml(r.bezeichnung)} · ${r.anzahlPraesentationen} Präsentationen</div>
+                            <div class="wf-progress mb-2">
+                                <div class="wf-progress-bar" style="width: ${Math.min(100, r.auslastungProzent)}%;"></div>
+                            </div>
+                            <div class="small">${r.belegtePlaetze} / ${r.gesamtkapazitaet}</div>
+                        </div>
+                    </div>`).join("");
+            }
+
+            async function loadStudentData() {
+                const [katalog, buchungen] = await Promise.all([
+                    apiFetch("/api/praesentationen"),
+                    apiFetch("/api/buchungen/meine")
+                ]);
+                state.katalog = katalog;
+                state.meineBuchungen = buchungen;
+                updateHeaderAndNav();
+            }
+
+            async function loadAdminData() {
+                const [katalog, berichte] = await Promise.all([
+                    apiFetch("/api/praesentationen"),
+                    apiFetch("/api/admin/raum-auslastung")
+                ]);
+                state.katalog = katalog;
+                state.berichte = berichte;
+                updateHeaderAndNav();
+            }
+
+            function logout() {
+                state.token = "";
+                state.user = null;
+                state.katalog = [];
+                state.meineBuchungen = [];
+                state.berichte = [];
+                sessionStorage.removeItem("wf_jwt");
+                sessionStorage.removeItem("wf_user");
+                updateHeaderAndNav();
+                navigateTo("login");
+            }
+
+            document.getElementById("login-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = document.getElementById("login-email").value.trim();
+                const passwort = document.getElementById("login-password").value;
+
+                try {
+                    const auth = await apiFetch("/api/auth/login", {
+                        method: "POST",
+                        body: JSON.stringify({ email, passwort })
+                    });
+                    state.token = auth.token;
+                    state.user = auth;
+                    sessionStorage.setItem("wf_jwt", auth.token);
+                    sessionStorage.setItem("wf_user", JSON.stringify(auth));
+
+                    if (auth.istAdmin) {
+                        await loadAdminData();
+                        renderAdminDashboard();
+                        renderBerichte();
+                        navigateTo("admin-dashboard");
+                    } else {
+                        await loadStudentData();
+                        renderKatalog();
+                        renderMeineBuchungen();
+                        navigateTo("katalog");
+                    }
+                    showAlert(`Angemeldet als ${auth.vorname} ${auth.nachname}.`, "info");
+                } catch (err) {
+                    showAlert(err.message, "error");
+                }
+            });
+
+            document.querySelectorAll(".wf-nav-link").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const target = btn.dataset.view;
+                    try {
+                        if (target === "katalog") {
+                            await loadStudentData();
+                            renderKatalog();
+                        } else if (target === "meine-buchungen") {
+                            await loadStudentData();
+                            renderMeineBuchungen();
+                        } else if (target === "admin-dashboard") {
+                            await loadAdminData();
+                            renderAdminDashboard();
+                        } else if (target === "admin-berichte") {
+                            await loadAdminData();
+                            renderBerichte();
+                        }
+                        navigateTo(target);
+                    } catch (err) {
+                        showAlert(err.message, "error");
+                    }
+                });
+            });
+
+            document.getElementById("btn-logout-student").addEventListener("click", logout);
+            document.getElementById("btn-logout-admin").addEventListener("click", logout);
+
+            document.getElementById("btn-refresh-katalog").addEventListener("click", async () => {
+                await loadStudentData();
+                renderKatalog();
+            });
+
+            document.getElementById("btn-refresh-buchungen").addEventListener("click", async () => {
+                await loadStudentData();
+                renderMeineBuchungen();
+            });
+
+            document.getElementById("btn-refresh-admin-dashboard").addEventListener("click", async () => {
+                await loadAdminData();
+                renderAdminDashboard();
+            });
+
+            document.getElementById("admin-filter-input").addEventListener("input", renderAdminDashboard);
+
+            document.getElementById("btn-refresh-berichte").addEventListener("click", async () => {
+                await loadAdminData();
+                renderBerichte();
+            });
+
+            document.getElementById("form-csv-g3").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById("csv-g3-file");
+                const pwd = document.getElementById("csv-g3-password").value || "ChangeMe2026!";
+                if (!fileInput.files.length) return;
+
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+
+                try {
+                    const res = await apiFetch(`/api/admin/import/g3-schueler?defaultPassword=${encodeURIComponent(pwd)}`, {
+                        method: "POST",
+                        body: formData
+                    });
+                    document.getElementById("csv-g3-result").innerHTML = `
+                        <div class="wf-box p-2">
+                            Importiert: <strong>${res.importierteZeilen}</strong> · Übersprungen: <strong>${res.uebersprungeneZeilen}</strong>
+                            ${res.hinweise?.length ? `<ul class="mb-0 mt-1">${res.hinweise.map(h => `<li>${escapeHtml(h)}</li>`).join("")}</ul>` : ""}
+                        </div>`;
+                    showAlert("G3-CSV-Import abgeschlossen.", "info");
+                } catch (err) {
+                    showAlert(err.message, "error");
+                }
+            });
+
+            document.getElementById("form-csv-pr").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById("csv-pr-file");
+                if (!fileInput.files.length) return;
+
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+
+                try {
+                    const res = await apiFetch("/api/admin/import/praesentationen", {
+                        method: "POST",
+                        body: formData
+                    });
+                    document.getElementById("csv-pr-result").innerHTML = `
+                        <div class="wf-box p-2">
+                            Importiert: <strong>${res.importierteZeilen}</strong> · Übersprungen: <strong>${res.uebersprungeneZeilen}</strong>
+                            ${res.hinweise?.length ? `<ul class="mb-0 mt-1">${res.hinweise.map(h => `<li>${escapeHtml(h)}</li>`).join("")}</ul>` : ""}
+                        </div>`;
+                    await loadAdminData();
+                    renderAdminDashboard();
+                    showAlert("Präsentationen-CSV-Import abgeschlossen.", "info");
+                } catch (err) {
+                    showAlert(err.message, "error");
+                }
+            });
+
+            const resetInput = document.getElementById("reset-confirm-input");
+            const resetBtn = document.getElementById("btn-execute-reset");
+            resetInput.addEventListener("input", () => {
+                resetBtn.disabled = resetInput.value !== "RESET";
+            });
+
+            document.getElementById("form-system-reset").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                if (resetInput.value !== "RESET") return;
+
+                try {
+                    const res = await apiFetch("/api/admin/system-reset", {
+                        method: "POST",
+                        body: JSON.stringify({ bestaetigung: "RESET" })
+                    });
+                    resetInput.value = "";
+                    resetBtn.disabled = true;
+                    await loadAdminData();
+                    renderAdminDashboard();
+                    renderBerichte();
+                    showAlert(res.message || "System zurückgesetzt.", "info");
+                } catch (err) {
+                    showAlert(err.message, "error");
+                }
+            });
+
+            updateHeaderAndNav();
+            if (state.token && state.user) {
+                (async () => {
+                    try {
+                        if (state.user.istAdmin) {
+                            await loadAdminData();
+                            renderAdminDashboard();
+                            renderBerichte();
+                            navigateTo("admin-dashboard");
+                        } else {
+                            await loadStudentData();
+                            renderKatalog();
+                            renderMeineBuchungen();
+                            navigateTo("katalog");
+                        }
+                    } catch {
+                        logout();
+                    }
+                })();
+            } else {
+                navigateTo("login");
+            }
+        })();
+    </script>
+}
