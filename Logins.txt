@@ -1,0 +1,4 @@
+admin@schule.ch			Test123!
+lukas.meier@schule.ch		Test123!
+sara.keller@schule.ch		Test123!
+noah.brunner@schule.ch		Test123!
